@@ -13,8 +13,8 @@ const MainLayout = () => {
         <Menu theme="light" mode="vertical" defaultSelectedKeys={["1"]}>
           <Menu.Item key="1" onClick={() => navigate("/")}>Inicio</Menu.Item>
           <Menu.Item key="2" onClick={() => navigate("/dashboard")}>Dashboard</Menu.Item>
-          <Menu.Item key="3" onClick={() => navigate("/dashboard")}>Menu</Menu.Item>
-          <Menu.Item key="4" onClick={() => navigate("/dashboard")}>Nosotros</Menu.Item>
+          <Menu.Item key="3" onClick={() => navigate("/tareas")}>Nueva Tarea</Menu.Item>
+          <Menu.Item key="4" onClick={() => navigate("/listaTareas")}>Lista de tareas</Menu.Item>
           <Menu.Item key="5" onClick={() => navigate("/dashboard")}>Configuracion</Menu.Item>
         </Menu>
       </Sider>

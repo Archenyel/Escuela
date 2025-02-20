@@ -12,7 +12,7 @@ const LoginForm = () => {
       const response = await fetch("http://localhost:5000/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", 
         },
         body: JSON.stringify({
           email: values.username,
@@ -26,9 +26,10 @@ const LoginForm = () => {
         throw new Error(data.error || "Error al iniciar sesión");
       }
 
-      message.succeusuariosss("Inicio de sesión exitoso");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", data.userName);
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error) { 
       message.error(error.message || "Hubo un problema con el inicio de sesión");
     } finally {
       setLoading(false);

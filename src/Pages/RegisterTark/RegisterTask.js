@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Form, Input, DatePicker, Button, message, Card } from "antd";
+import { Form, Input, DatePicker, Button, message, Card, Select } from "antd";
+
+const { Option } = Select;  
 
 const TaskForm = () => {
   const [loading, setLoading] = useState(false);
@@ -11,6 +13,7 @@ const TaskForm = () => {
         userName: localStorage.getItem("user"),
         task: values.task,
         date: values.date.format("YYYY-MM-DD"),
+        status: values.status,
       };
 
       const response = await fetch("http://localhost:5000/registerTask", {
@@ -24,7 +27,6 @@ const TaskForm = () => {
       if (!response.ok) {
         throw new Error("Error en el registro");
       }
-
       const data = await response.json();
       console.log("Registro exitoso:", data);
       message.success("Registro exitoso!");
@@ -57,6 +59,19 @@ const TaskForm = () => {
         >
           <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
         </Form.Item>
+
+        <Form.Item
+        label="Estatus"
+        name="status"
+        rules={[{ required: true, message: "Selecciona un status" }]}
+      >
+        <Select placeholder="Selecciona un estatus">
+          <Option value="En progreso">En progreso</Option>
+          <Option value="Pausado">Pausado</Option>
+          <Option value="En revisión">En revision</Option>
+          <Option value="Completado">Completado</Option>
+        </Select>
+      </Form.Item>
 
         <Form.Item>
           <Button type="primary" htmlType="submit" block loading={loading}>

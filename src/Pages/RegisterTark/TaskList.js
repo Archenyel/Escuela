@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Table, message, Card, Spin } from "antd";
+import { Card, message, Spin, Button } from "antd";
 import FloatingButtonWithModal from "./Modal";
+import TaskEditModal from "./ModalEdit";
 import axios from "axios";
-import ModalEdit from "./ModalEdit";
+import "../../Kanban.css";
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [edit, setEdit] = useState(false);
-  const [codigo, setCodigo] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState(null);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -32,63 +33,66 @@ const TaskList = () => {
     fetchTasks();
   }, []);
 
+  const handleEditClick = (task) => {
+    setTaskToEdit(task);
+    setModalVisible(true);
+  };
+
+  const handleSave = (updatedTask) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+    );
+    message.success("Tarea actualizada correctamente");
+  };
+
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/tasks/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("user")}` },
       });
-      setTasks(tasks.filter(task => task.id !== id)); // Actualiza el estado para reflejar el cambio
+      setTasks(tasks.filter((task) => task.id !== id));
       message.success("Tarea eliminada");
     } catch (error) {
       message.error("Error al eliminar la tarea");
     }
   };
 
-  const handleEdit = async (id) => {
-    setEdit(true);
-    setCodigo(id); // Guarda el id de la tarea a editar
-  };
-
-  const columns = [
-    {
-      title: "Tarea",
-      dataIndex: "task",
-      key: "task",
-    },
-    {
-      title: "Fecha",
-      dataIndex: "date",
-      key: "date",
-    },
-    {
-      title: "Estatus",
-      dataIndex: "status",
-      key: "status",
-    },
-    {
-      title: "Acciones",
-      dataIndex: "actions",
-      key: "actions",
-      render: (text, record) => (
-        <div>
-          <button onClick={() => handleDelete(record.id)}>Eliminar</button>
-          <button onClick={() => handleEdit(record.id)}>Editar</button>
-        </div>
-      ),
-    }
-  ];
+  const taskStatuses = ["En progreso", "Pausado", "En revisión", "Completado"];
 
   return (
-    <div>
-      <Card title="Lista de Tareas" style={{ width: 600, margin: "50px auto" }}>
-        {loading ? (
-          <Spin size="large" />
-        ) : (
-          <Table dataSource={tasks} columns={columns} rowKey="id" />
-        )}
-      </Card>
+    <div className="kanban-board">
+      {loading ? (
+        <Spin size="large" />
+      ) : (
+        taskStatuses.map((status) => (
+          <div key={status} className="kanban-column">
+            <h2>{status}</h2>
+            {tasks
+              .filter((task) => task.status === status)
+              .map((task) => (
+                <Card key={task.id} className="kanban-card">
+                  <h3>{task.task}</h3>
+                  <p>{task.date}</p>
+                  <div className="kanban-actions">
+                    <Button danger onClick={() => handleDelete(task.id)}>
+                      Eliminar
+                    </Button>
+                    <Button style={{ marginLeft: 8 }} onClick={() => handleEditClick(task)}>
+                      Editar
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+          </div>
+        ))
+      )}
       <FloatingButtonWithModal />
-      {edit && <ModalEdit codigo={codigo} setEdit={setEdit} />}
+      <TaskEditModal
+        visible={modalVisible}
+        onCancel={() => setModalVisible(false)}
+        initialValues={taskToEdit}
+        onSave={handleSave}
+      />
     </div>
   );
 };

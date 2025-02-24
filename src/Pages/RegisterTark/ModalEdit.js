@@ -1,45 +1,47 @@
-import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, DatePicker, Button, Select, message } from "antd";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { Form, Input, DatePicker, Button, message, Select, Modal } from "antd";
+import dayjs from "dayjs";
 
 const { Option } = Select;
 
-const ModalEdit = ({ codigo, setEdit }) => {
+const TaskEditModal = ({ visible, onCancel, initialValues, onSave }) => {
   const [loading, setLoading] = useState(false);
-  const [taskData, setTaskData] = useState(null);
+  const [form] = Form.useForm();
 
   useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5000/tasks/${codigo}`);
-        setTaskData(response.data); // Cargar los datos de la tarea
-      } catch (error) {
-        message.error("Error al cargar los datos de la tarea");
-      }
-    };
-
-    if (codigo) {
-      fetchTask();
+    if (initialValues) {
+      form.setFieldsValue({
+        ...initialValues,
+        date: initialValues.date ? dayjs(initialValues.date) : null,
+      });
     }
-  }, [codigo]);
+  }, [initialValues, form]);
 
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const updatedTaskData = {
-        task: values.task,
-        date: values.date.format("YYYY-MM-DD"),
-        status: values.status,
+      const updatedTask = {
+        ...values,
+        date: values.date ? values.date.format("YYYY-MM-DD") : null,
       };
 
-      const response = await axios.put(`http://localhost:5000/tasks/${codigo}`, updatedTaskData);
-      
-      if (response.status === 200) {
-        message.success("Tarea actualizada correctamente");
-        setEdit(false); // Cerrar el modal después de la edición
-      }
+      const response = await fetch(
+        `http://localhost:5000/updateTask/${initialValues?.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedTask),
+        }
+      );
+
+      if (!response.ok) throw new Error("Error en la actualización");
+
+      message.success("Tarea actualizada correctamente!");
+      onSave(updatedTask);
+      onCancel();
     } catch (error) {
-      message.error("Hubo un problema al editar la tarea");
+      console.error("Error:", error);
+      message.error("Hubo un problema con la actualización");
     } finally {
       setLoading(false);
     }
@@ -48,44 +50,48 @@ const ModalEdit = ({ codigo, setEdit }) => {
   return (
     <Modal
       title="Editar Tarea"
-      visible={true}
-      onCancel={() => setEdit(false)}
+      open={visible}
+      onCancel={onCancel}
       footer={null}
     >
-      {taskData ? (
-        <Form
-          initialValues={taskData}
-          onFinish={onFinish}
-          layout="vertical"
+      <Form form={form} onFinish={onFinish} layout="vertical">
+        <Form.Item
+          label="Tarea"
+          name="task"
+          rules={[{ required: true, message: "Por favor ingresa una tarea" }]}
         >
-          <Form.Item label="Tarea" name="task" rules={[{ required: true, message: "Por favor ingresa una tarea" }]}>
-            <Input />
-          </Form.Item>
+          <Input placeholder="Escribe tu tarea aquí" />
+        </Form.Item>
 
-          <Form.Item label="Fecha" name="date" rules={[{ required: true, message: "Selecciona una fecha" }]}>
-            <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
-          </Form.Item>
+        <Form.Item
+          label="Fecha"
+          name="date"
+          rules={[{ required: true, message: "Selecciona una fecha" }]}
+        >
+          <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
+        </Form.Item>
 
-          <Form.Item label="Estatus" name="status" rules={[{ required: true, message: "Selecciona un estatus" }]}>
-            <Select>
-              <Option value="En progreso">En progreso</Option>
-              <Option value="Pausado">Pausado</Option>
-              <Option value="En revisión">En revisión</Option>
-              <Option value="Completado">Completado</Option>
-            </Select>
-          </Form.Item>
+        <Form.Item
+          label="Estatus"
+          name="status"
+          rules={[{ required: true, message: "Selecciona un estatus" }]}
+        >
+          <Select placeholder="Selecciona un estatus">
+            <Option value="En progreso">En progreso</Option>
+            <Option value="Pausado">Pausado</Option>
+            <Option value="En revisión">En revisión</Option>
+            <Option value="Completado">Completado</Option>
+          </Select>
+        </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
-              Guardar cambios
-            </Button>
-          </Form.Item>
-        </Form>
-      ) : (
-        <p>Cargando tarea...</p>
-      )}
+        <Form.Item>
+          <Button type="primary" htmlType="submit" block loading={loading}>
+            Guardar Cambios
+          </Button>
+        </Form.Item>
+      </Form>
     </Modal>
   );
 };
 
-export default ModalEdit;
+export default TaskEditModal;

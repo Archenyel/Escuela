@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Card, message, Spin, Button, Select } from "antd";
 import axios from "axios";
 import "../../Kanban.css";
+import { Typography } from "antd";
+
+const { Title, Text, Paragraph } = Typography;
 
 const { Option } = Select;
 
@@ -10,14 +13,16 @@ const GroupTaskList = () => {
   const [loading, setLoading] = useState(true);
   const [updatingTaskId, setUpdatingTaskId] = useState(null);
 
+  const user = localStorage.getItem("user");
+
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const userName = localStorage.getItem("user");
+        const group = localStorage.getItem("grupo");
 
         const response = await axios.get("http://localhost:5000/groupTasks", {
           headers: {
-            Authorization: `Bearer ${userName}`,
+            Authorization: `Bearer ${group}`,
           },
         });
 
@@ -35,7 +40,7 @@ const GroupTaskList = () => {
   const taskStatuses = ["En progreso", "Pausado", "En revisión", "Completado"];
 
   const handleStatusChange = async (taskId, newStatus) => {
-    setUpdatingTaskId(taskId); 
+    setUpdatingTaskId(taskId);
 
     try {
       await axios.put(`http://localhost:5000/updateTaskStatus/${taskId}`, {
@@ -52,9 +57,10 @@ const GroupTaskList = () => {
     } catch (error) {
       message.error("Error al actualizar el estatus");
     } finally {
-      setUpdatingTaskId(null); 
+      setUpdatingTaskId(null);
     }
   };
+
 
   return (
     <div className="kanban-board">
@@ -68,14 +74,21 @@ const GroupTaskList = () => {
               .filter((task) => task.status === status)
               .map((task) => (
                 <Card key={task.id} className="kanban-card">
-                  <h3>{task.taskName}</h3>
-                  <p>{task.dueDate}</p>
+                  <Title level={4} className="task-name">
+                    {task.taskName}
+                  </Title>
+                  <Paragraph className="task-date">
+                    <Text strong>Fecha asignada:</Text> {task.dueDate}
+                  </Paragraph>
+                  <Paragraph className="task-assigned">
+                    <Text strong>Asignado a:</Text> {task.assignedTo}
+                  </Paragraph>
                   <div className="kanban-actions">
                     <Select
                       defaultValue={task.status}
                       style={{ width: 150 }}
                       onChange={(value) => handleStatusChange(task.id, value)}
-                      disabled={updatingTaskId === task.id}
+                      disabled={ !(task.assignedTo === user) }
                     >
                       {taskStatuses.map((statusOption) => (
                         <Option key={statusOption} value={statusOption}>

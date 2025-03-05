@@ -12,6 +12,11 @@ const Welcome = () => {
       <Button type="primary" onClick={() => navigate("/login")}>
         Iniciar Sesión
       </Button>
+      <br />
+      <br />
+      <Button type="default" onClick={() => navigate("/registro")}>
+        crear una cuenta
+      </Button>
     </Card>
   );
 };

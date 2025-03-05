@@ -1,6 +1,8 @@
 import React from "react";
 import { Card } from "antd";
 console.log(localStorage.getItem("user"));
+console.log(localStorage.getItem("grupo"));
+console.log(localStorage.getItem("role"));
 
 
 const Dashboard = () => { 

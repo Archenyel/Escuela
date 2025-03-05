@@ -1,11 +1,14 @@
 import React from "react";
-import { Form, Input, Button, Select, DatePicker, message } from "antd";
+import { Form, Input, Button, /*Select, DatePicker,*/ message } from "antd";
+import { useNavigate } from "react-router-dom";
 
-const { Option } = Select;  
+//const { Option } = Select;
 
 const RegisterForm = () => {
   const [form] = Form.useForm();
-    
+
+  const navigate = useNavigate();
+
   const onFinish = async (values) => {
     try {
       const response = await fetch("http://localhost:5000/registro", {
@@ -13,19 +16,23 @@ const RegisterForm = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values ),
+        body: JSON.stringify(values),
       });
   
-      if (!response.ok) {   
-        throw new Error("Error en el registro");
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Error en el registro");
       }
   
-      const data = await response.json();
       console.log("Registro exitoso:", data);
       message.success("Registro exitoso!");
+  
+      form.resetFields();
+      navigate("/login");
     } catch (error) {
       console.error("Error:", error);
-      message.error("Hubo un problema con el registro");
+      message.error(error.message || "Ocurrió un error en el registro");
     }
   };
   
@@ -35,12 +42,25 @@ const RegisterForm = () => {
       form={form}
       layout="vertical"
       onFinish={onFinish}
-      style={{ maxWidth: 400, margin: "auto", padding: 20, border: "1px solid #ddd", borderRadius: 8, backgroundColor:"white" }}
+      style={{
+        maxWidth: 400,
+        margin: "auto",
+        marginTop: 50,
+        padding: 20,
+        border: "1px solid #ddd",
+        borderRadius: 8,
+        backgroundColor: "white",
+      }}
     >
       <Form.Item
         label="Nombre de Usuario"
         name="userName"
-        rules={[{ required: true, message: "Por favor ingresa tu nombre de usuario      !" }]}
+        rules={[
+          {
+            required: true,
+            message: "Por favor ingresa tu nombre de usuario      !",
+          },
+        ]}
       >
         <Input />
       </Form.Item>
@@ -48,7 +68,13 @@ const RegisterForm = () => {
       <Form.Item
         label="Correo Electrónico"
         name="email"
-        rules={[{ required: true, message: "Por favor ingresa tu correo electrónico!", type: "email" }]}
+        rules={[
+          {
+            required: true,
+            message: "Por favor ingresa tu correo electrónico!",
+            type: "email",
+          },
+        ]}
       >
         <Input />
       </Form.Item>
@@ -56,29 +82,15 @@ const RegisterForm = () => {
       <Form.Item
         label="Contraseña"
         name="password"
-        rules={[{ required: true, message: "Por favor ingresa tu contraseña!" }]}
+        rules={[
+          { required: true, message: "Por favor ingresa tu contraseña!" },
+          {
+            pattern: /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
+            message: 'La contraseña debe contener al menos un número y un símbolo'
+          },
+        ]}
       >
         <Input.Password />
-      </Form.Item>
-
-      <Form.Item
-        label="Último Inicio de Sesión"
-        name="last_login"
-        rules={[{ required: true, message: "Por favor selecciona la fecha y hora!" }]}
-      >
-        <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
-      </Form.Item>
-
-      <Form.Item
-        label="Rol"
-        name="rol"
-        rules={[{ required: true, message: "Por favor selecciona un rol!" }]}
-      >
-        <Select placeholder="Selecciona un rol">
-          <Option value="admin">Admin</Option>
-          <Option value="editor">Editor</Option>
-          <Option value="user">Usuario</Option>
-        </Select>
       </Form.Item>
 
       <Form.Item>

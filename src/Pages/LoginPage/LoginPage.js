@@ -26,9 +26,13 @@ const LoginForm = () => {
         throw new Error(data.error || "Error al iniciar sesión");
       }
 
-      localStorage.setItem("token", data.token);
+      //localStorage.setItem("token", data.token);
       localStorage.setItem("user", data.userName);
+      localStorage.setItem("grupo", data.grupo);
+      localStorage.setItem("role", data.rol);
+
       navigate("/dashboard");
+
     } catch (error) { 
       message.error(error.message || "Hubo un problema con el inicio de sesión");
     } finally {

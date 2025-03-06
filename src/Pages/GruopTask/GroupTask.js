@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, message, Spin, Button, Select } from "antd";
-import axios from "axios";
+import api from "../../services/Api";
 import "../../Kanban.css";
 import { Typography } from "antd";
 
@@ -20,7 +20,7 @@ const GroupTaskList = () => {
       try {
         const group = localStorage.getItem("grupo");
 
-        const response = await axios.get("http://localhost:5000/groupTasks", {
+        const response = await api.get("/groupTasks", {
           headers: {
             Authorization: `Bearer ${group}`,
           },
@@ -43,7 +43,7 @@ const GroupTaskList = () => {
     setUpdatingTaskId(taskId);
 
     try {
-      await axios.put(`http://localhost:5000/updateTaskStatus/${taskId}`, {
+      await api.put(`/updateTaskStatus/${taskId}`, {
         status: newStatus,
       });
 

@@ -1,5 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./components/AuthContext";
+import PrivateRoute from "./components/PrivateRoute";
 import Welcome from "./Pages/LandingPage/LandingPage";
 import LoginForm from "./Pages/LoginPage/LoginPage";
 import MainLayout from "./Layouts/MainLayouts";
@@ -14,20 +16,30 @@ import GroupTaskList from "./Pages/GruopTask/GroupTask";
 
 const RoutesComponent = () => {
   return (
+    <AuthProvider>
       <Routes>
         <Route path="" element={<Welcome />} />
         <Route path="/registro" element={<RegisterForm />} />
         <Route path="/login" element={<LoginForm />} />
-        <Route path="/" element={<MainLayout />}>
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="tareas" element={<TaskForm />} />
-          <Route path="listaTareas" element={<TaskList />} />
-          <Route path="listaUsuarios" element={<UserList />} />
-          <Route path="crearGrupo" element={<UserGroupList />} />
-          <Route path="asignarTareas" element={<TaskAssignment />} />
-          <Route path="tareasGrupo" element={<GroupTaskList />} />
+
+        {/* Rutas protegidas dentro del MainLayout */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<MainLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="tareas" element={<TaskForm />} />
+            <Route path="listaTareas" element={<TaskList />} />
+            <Route element={<PrivateRoute allowedRoles={["Admin"]} />}>
+              <Route path="listaUsuarios" element={<UserList />} />
+            </Route>
+            <Route element={<PrivateRoute allowedRoles={["lider","Admin"]} />}>
+              <Route path="crearGrupo" element={<UserGroupList />} />
+              <Route path="asignarTareas" element={<TaskAssignment />} />
+            </Route>
+            <Route path="tareasGrupo" element={<GroupTaskList />} />
+          </Route>
         </Route>
       </Routes>
+    </AuthProvider>
   );
 };
 

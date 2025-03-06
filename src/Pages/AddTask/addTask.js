@@ -1,6 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Table, Select, Button, Modal, Input, DatePicker, message, Form } from 'antd';
+import React, { useEffect, useState } from "react";
+import api from "../../services/Api";
+import {
+  Table,
+  Select,
+  Button,
+  Modal,
+  Input,
+  DatePicker,
+  message,
+  Form,
+} from "antd";
 
 const { Option } = Select;
 
@@ -12,26 +21,28 @@ const TaskAssignment = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [form] = Form.useForm();
 
-  const currentUserName = localStorage.getItem('user');
+  const currentUserName = localStorage.getItem("user");
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/groups`)
-      .then(response => {
+    api
+      .get("/groups")
+      .then((response) => {
         setGroups(response.data);
       })
-      .catch(err => {
-        message.error('Error al obtener los grupos');
+      .catch((err) => {
+        message.error("Error al obtener los grupos");
       });
   }, []);
 
   const handleGroupSelect = (groupId) => {
     setSelectedGroup(groupId);
-    axios.get(`http://localhost:5000/usersByGroup?groupId=${groupId}`)
-      .then(response => {
+    api
+      .get(`/usersByGroup?groupId=${groupId}`)
+      .then((response) => {
         setUsers(response.data);
       })
-      .catch(err => {
-        message.error('Error al obtener los usuarios del grupo');
+      .catch((err) => {
+        message.error("Error al obtener los usuarios del grupo");
       });
   };
 
@@ -41,35 +52,38 @@ const TaskAssignment = () => {
   };
 
   const handleAssignTask = (values) => {
-    axios.post('http://localhost:5000/assignedTask', {
-      groupId: selectedGroup,
-      assignedTo: selectedUser,
-      taskName: values.taskName,
-      dueDate: values.dueDate.format('YYYY-MM-DD'),
-      status: values.status,
-      createdBy: currentUserName,
-    })
-    .then(() => {
-      message.success('Tarea asignada con éxito');
-      setTaskModalVisible(false);
-      form.resetFields();
-    })
-    .catch(() => {
-      message.error('Error al asignar la tarea');
-    });
+    api
+      .post("/assignedTask", {
+        groupId: selectedGroup,
+        assignedTo: selectedUser,
+        taskName: values.taskName,
+        dueDate: values.dueDate.format("YYYY-MM-DD"),
+        status: values.status,
+        createdBy: currentUserName,
+      })
+      .then(() => {
+        message.success("Tarea asignada con éxito");
+        setTaskModalVisible(false);
+        form.resetFields();
+      })
+      .catch(() => {
+        message.error("Error al asignar la tarea");
+      });
   };
 
   return (
     <div>
       <h1>Asignación de Tareas</h1>
 
-      <Select 
+      <Select
         placeholder="Selecciona un grupo"
         style={{ width: 300, marginBottom: 20 }}
         onChange={handleGroupSelect}
       >
-        {groups.map(group => (
-          <Option key={group.id} value={group.groupName}>{group.groupName}</Option>
+        {groups.map((group) => (
+          <Option key={group.id} value={group.groupName}>
+            {group.groupName}
+          </Option>
         ))}
       </Select>
 
@@ -77,11 +91,14 @@ const TaskAssignment = () => {
         <Table dataSource={users} rowKey="id" pagination={false}>
           <Table.Column title="Nombre" dataIndex="userName" key="userName" />
           <Table.Column title="Email" dataIndex="email" key="email" />
-          <Table.Column 
-            title="Acciones" 
+          <Table.Column
+            title="Acciones"
             key="actions"
             render={(text, record) => (
-              <Button type="primary" onClick={() => showTaskModal(record.userName)}>
+              <Button
+                type="primary"
+                onClick={() => showTaskModal(record.userName)}
+              >
                 Asignar Tarea
               </Button>
             )}
@@ -99,7 +116,12 @@ const TaskAssignment = () => {
           <Form.Item
             label="Nombre de la tarea"
             name="taskName"
-            rules={[{ required: true, message: "Por favor ingresa un nombre para la tarea" }]}
+            rules={[
+              {
+                required: true,
+                message: "Por favor ingresa un nombre para la tarea",
+              },
+            ]}
           >
             <Input placeholder="Escribe la tarea aquí" />
           </Form.Item>

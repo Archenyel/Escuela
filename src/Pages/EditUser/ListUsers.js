@@ -1,7 +1,7 @@
-// UserList.js
+
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../services/Api';
 import { Table, Select, Button, message } from 'antd';
 
 const { Option } = Select;
@@ -12,8 +12,8 @@ const UserList = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    axios
-      .get('http://localhost:5000/users')
+    api
+      .get('/users')
       .then((response) => {
         setUsers(response.data); 
         setLoading(false);
@@ -26,8 +26,8 @@ const UserList = () => {
 
   const handleRoleChange = (value, userId) => {
 
-    axios
-      .put(`http://localhost:5000/users/${userId}`, { rol: value })
+    api
+      .put(`/users/${userId}`, { rol: value })
       .then((response) => {
         const updatedUsers = users.map((user) =>
           user.id === userId ? { ...user, rol: value } : user
@@ -70,7 +70,7 @@ const UserList = () => {
           onChange={(value) => handleRoleChange(value, record.id)}
         >
           <Option value="admin">Admin</Option>
-          <Option value="lider">Líder</Option>
+          <Option value="lider">lider</Option>
           <Option value="usuario">Usuario</Option>
         </Select>
       ),

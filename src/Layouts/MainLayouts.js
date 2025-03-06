@@ -1,19 +1,21 @@
 import React from "react";
 import { Layout, Menu, message } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
+import { useAuth } from "../components/AuthContext";
 
 const { Header, Sider, Content, Footer } = Layout;
 
-const rol = localStorage.getItem("role");
 
 const MainLayout = () => {
+  const rol = localStorage.getItem("role");
+
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
 
     localStorage.clear();
-
-
+    logout();
     message.success("Sesión cerrada correctamente");
 
     setTimeout(() => {
@@ -25,13 +27,12 @@ const MainLayout = () => {
     <Layout style={{ minHeight: "100vh" }}>
       <Sider theme="light">
         <Menu theme="light" mode="vertical" defaultSelectedKeys={["2"]}>
-          <Menu.Item key="1" onClick={() => navigate("/")}>Inicio</Menu.Item>
           <Menu.Item key="2" onClick={() => navigate("/dashboard")}>Dashboard</Menu.Item>
           <Menu.Item key="3" onClick={() => navigate("/tareas")}>Nueva Tarea</Menu.Item>
           <Menu.Item key="4" onClick={() => navigate("/listaTareas")}>Tareas Personales</Menu.Item>
           <Menu.Item key="5" onClick={() => navigate("/tareasGrupo")}>Tareas de grupo</Menu.Item>
-          {rol === "Líder" ? <Menu.Item key="6" onClick={() => navigate("/crearGrupo")}>Crear grupo</Menu.Item> : null}
-          {rol === "Líder" ? <Menu.Item key="7" onClick={() => navigate("/asignarTareas")}>Asignar tareas</Menu.Item> : null}
+          {rol === "lider" || rol === "Admin" ? <Menu.Item key="6" onClick={() => navigate("/crearGrupo")}>Crear grupo</Menu.Item> : null}
+          {rol === "lider" || rol === "Admin" ? <Menu.Item key="7" onClick={() => navigate("/asignarTareas")}>Asignar tareas</Menu.Item> : null}
           {rol === "Admin" ? <Menu.Item key="8" onClick={() => navigate("/listaUsuarios")}>Editar usuarios</Menu.Item> : null}
           <Menu.Item key="9" onClick={handleLogout}>cerrar sesion</Menu.Item>
         </Menu>

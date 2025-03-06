@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../services/Api';
 import { Table, Select, Button, message, Modal, Input } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 
@@ -15,7 +15,7 @@ const UserGroupList = () => {
   const currentUserName = localStorage.getItem("user");
 
   useEffect(() => {
-    axios.get('http://localhost:5000/users')
+    api.get('/users')
       .then(response => {
         setUsers(response.data);
         setLoading(false);
@@ -25,7 +25,7 @@ const UserGroupList = () => {
         setLoading(false);
       });
 
-    axios.get('http://localhost:5000/groups')
+    api.get('/groups')
       .then(response => {
         setGroups(response.data);
       })
@@ -36,8 +36,8 @@ const UserGroupList = () => {
   }, []);
 
   const handleGroupChange = (value, userId) => {
-    axios
-      .put(`http://localhost:5000/groupChange/${userId}`, { grupo: value })
+    api
+      .put(`/groupChange/${userId}`, { grupo: value })
       .then(() => {
         setUsers(users.map(user => user.id === userId ? { ...user, grupo: value } : user));
         message.success('Grupo asignado con éxito');
@@ -57,7 +57,7 @@ const UserGroupList = () => {
       return;
     }
 
-    axios.post('http://localhost:5000/groups', {
+    api.post('/groups', {
       groupName: newGroupName,
       createdBy: currentUserName,
     })

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Input, DatePicker, Button, message, Select, Modal } from "antd";
 import dayjs from "dayjs";
+import api from "../../services/Api";
 
 const { Option } = Select;
 
@@ -24,18 +25,11 @@ const TaskEditModal = ({ visible, onCancel, initialValues, onSave }) => {
         ...values,
         date: values.date ? values.date.format("YYYY-MM-DD") : null,
       };
-
-      const response = await fetch(
-        `http://localhost:5000/updateTask/${initialValues?.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedTask),
-        }
-      );
-
-      if (!response.ok) throw new Error("Error en la actualización");
-
+  
+      const response = await api.put(`/updateTask/${initialValues?.id}`, updatedTask);
+  
+      if (response.status !== 200) throw new Error("Error en la actualización");
+  
       message.success("Tarea actualizada correctamente!");
       onSave(updatedTask);
       onCancel();

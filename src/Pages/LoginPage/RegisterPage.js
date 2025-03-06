@@ -1,31 +1,34 @@
-import React from "react";
+import React, {useEffect } from "react";
 import { Form, Input, Button, /*Select, DatePicker,*/ message } from "antd";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../components/AuthContext";
+import api from "../../services/Api";
 
 //const { Option } = Select;
-
 const RegisterForm = () => {
   const [form] = Form.useForm();
-
   const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      logout(); // Llamamos a logout para limpiar el localStorage y el estado
+      message.info("Sesión cerrada automáticamente.");
+      navigate("/login"); // Redirige al login
+    }
+  }, [ ]);
+
 
   const onFinish = async (values) => {
     try {
-      const response = await fetch("http://localhost:5000/registro", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
+      const response = await api.post('/registro', values);
   
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.error || "Error en el registro");
+      if (response.status !== 200) {
+        throw new Error("Error en el registro");
       }
   
-      console.log("Registro exitoso:", data);
+      console.log("Registro exitoso:", response.data);
       message.success("Registro exitoso!");
   
       form.resetFields();
@@ -35,7 +38,6 @@ const RegisterForm = () => {
       message.error(error.message || "Ocurrió un error en el registro");
     }
   };
-  
 
   return (
     <Form
@@ -86,7 +88,8 @@ const RegisterForm = () => {
           { required: true, message: "Por favor ingresa tu contraseña!" },
           {
             pattern: /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
-            message: 'La contraseña debe contener al menos un número y un símbolo'
+            message:
+              "La contraseña debe contener al menos un número y un símbolo",
           },
         ]}
       >
@@ -96,6 +99,11 @@ const RegisterForm = () => {
       <Form.Item>
         <Button type="primary" htmlType="submit" block>
           Registrar
+        </Button>
+      </Form.Item>
+      <Form.Item>
+        <Button type="link" block onClick={() => navigate("/")}>
+          Volver
         </Button>
       </Form.Item>
     </Form>

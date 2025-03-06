@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, message, Spin, Button } from "antd";
 import FloatingButtonWithModal from "./Modal";
 import TaskEditModal from "./ModalEdit";
-import axios from "axios";
+import api from "../../services/Api";
 import "../../Kanban.css";
 
 const TaskList = () => {
@@ -16,7 +16,7 @@ const TaskList = () => {
       try {
         const userName = localStorage.getItem("user");
 
-        const response = await axios.get("http://localhost:5000/tasks", {
+        const response = await api.get("/tasks", {
           headers: {
             Authorization: `Bearer ${userName}`,
           },
@@ -47,7 +47,7 @@ const TaskList = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/tasks/${id}`, {
+      await api.delete(`/tasks/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("user")}` },
       });
       setTasks(tasks.filter((task) => task.id !== id));

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, Input, DatePicker, Button, message, Card, Select } from "antd";
-import axios from "axios";
+import api from "../../services/Api";
 
 const { Option } = Select;
 
@@ -11,8 +11,8 @@ const TaskEditForm = ({ taskId, onEditSuccess }) => {
     // Cargar los datos de la tarea cuando el `taskId` cambie
     useEffect(() => {
         if (taskId) {
-            axios
-                .get(`http://localhost:5000/tasks/${taskId}`)
+            api
+                .get(`/tasks/${taskId}`)
                 .then((response) => {
                     setTaskData(response.data); // Llenamos el estado con los datos de la tarea
                 })
@@ -30,29 +30,25 @@ const TaskEditForm = ({ taskId, onEditSuccess }) => {
     const onFinish = async (values) => {
         setLoading(true);
         try {
-            const updatedTaskData = {
-                task: values.task,
-                date: values.date.format("YYYY-MM-DD"),
-                status: values.status,
-            };
-
-            const response = await axios.put(`http://localhost:5000/tasks/${taskId}`, updatedTaskData);
-
-            if (response.status !== 200) {
-                throw new Error("Error al editar la tarea");
-            }
-
-            message.success("Tarea editada correctamente");
-
-            // Ejecutamos la callback si fue exitosa
-            if (onEditSuccess) onEditSuccess();
+          const updatedTaskData = {
+            task: values.task,
+            date: values.date.format("YYYY-MM-DD"),
+            status: values.status,
+          };
+      
+          const response = await api.put(`/tasks/${taskId}`, updatedTaskData);
+      
+          message.success("Tarea editada correctamente");
+      
+          if (onEditSuccess) onEditSuccess();
         } catch (error) {
-            console.error("Error:", error);
-            message.error("Hubo un problema al editar la tarea");
+          console.error("Error:", error);
+      
+          message.error(error.response?.data?.message || "Hubo un problema al editar la tarea");
         } finally {
-            setLoading(false);
+          setLoading(false);
         }
-    };
+      };
 
     return (
         <Card title="Editar Tarea" style={{ width: 400, margin: "50px auto" }}>
